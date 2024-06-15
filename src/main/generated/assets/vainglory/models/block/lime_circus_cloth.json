@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "vainglory:block/lime_circus_cloth"
+  }
+}

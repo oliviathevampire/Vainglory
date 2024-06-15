@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "W": {
+      "item": "minecraft:white_wool"
+    },
+    "m": {
+      "item": "minecraft:magenta_wool"
+    }
+  },
+  "pattern": [
+    "mW",
+    "mW"
+  ],
+  "result": {
+    "count": 1,
+    "id": "vainglory:magenta_circus_cloth"
+  }
+}

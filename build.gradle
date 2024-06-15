@@ -1,0 +1,81 @@
+plugins {
+	id 'maven-publish'
+	id "com.modrinth.minotaur" version "2.+"
+	id "org.jetbrains.gradle.plugin.idea-ext" version "1.1.3"
+	id 'org.quiltmc.gradle.licenser' version '1.+'
+	id 'fabric-loom' version '1.6-SNAPSHOT'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+repositories {
+	maven { url = "https://maven.parchmentmc.net/" }
+}
+
+fabricApi {
+	configureDataGeneration()
+}
+
+dependencies {
+	minecraft libs.minecraft
+	mappings loom.layered {
+//		it.mappings("org.quiltmc:quilt-mappings:${libs.versions.quilt.mappings.get()}:intermediary-v2")
+		it.parchment("org.parchmentmc.data:parchment-1.20.6:${libs.versions.parchment.get()}@zip")
+		it.officialMojangMappings()
+	}
+
+	modImplementation libs.fabric.loader
+
+	modImplementation libs.fabric.api
+}
+
+processResources {
+	inputs.property 'version', version
+
+	filesMatching('fabric.mod.json') {
+		expand inputs.properties
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 21
+}
+
+java {
+	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+	// if it is present.
+	// If you remove this line, sources will not be generated.
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
+
+jar {
+	from("LICENSE") {
+		rename { "${it}_${project.base.archivesName.get()}"}
+	}
+}
+
+// configure the maven publication
+publishing {
+	publications {
+		create("mavenJava", MavenPublication) {
+			artifactId = project.archives_base_name
+			from components.java
+		}
+	}
+
+	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+	repositories {
+		// Add repositories to publish to here.
+		// Notice: This block does NOT have the same function as the block in the top level.
+		// The repositories here will be used for publishing your artifact, not for
+		// retrieving dependencies.
+	}
+}

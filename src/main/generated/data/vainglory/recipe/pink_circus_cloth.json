@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "W": {
+      "item": "minecraft:white_wool"
+    },
+    "p": {
+      "item": "minecraft:pink_wool"
+    }
+  },
+  "pattern": [
+    "pW",
+    "pW"
+  ],
+  "result": {
+    "count": 1,
+    "id": "vainglory:pink_circus_cloth"
+  }
+}

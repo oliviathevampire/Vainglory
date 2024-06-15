@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "W": {
+      "item": "minecraft:white_wool"
+    },
+    "c": {
+      "item": "minecraft:cyan_wool"
+    }
+  },
+  "pattern": [
+    "cW",
+    "cW"
+  ],
+  "result": {
+    "count": 1,
+    "id": "vainglory:cyan_circus_cloth"
+  }
+}

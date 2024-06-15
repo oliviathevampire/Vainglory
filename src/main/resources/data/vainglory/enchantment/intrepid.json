@@ -1,0 +1,22 @@
+{
+    "anvil_cost": 4,
+    "description": {
+        "translate": "enchantment.vainglory.intrepid"
+    },
+    "effects": {},
+    "max_cost": {
+        "base": 25,
+        "per_level_above_first": 10
+    },
+    "max_level": 4,
+    "min_cost": {
+        "base": 10,
+        "per_level_above_first": 10
+    },
+    "slots": [
+        "mainhand",
+        "offhand"
+    ],
+    "supported_items": "#vainglory:enchantable/lance",
+    "weight": 2
+}

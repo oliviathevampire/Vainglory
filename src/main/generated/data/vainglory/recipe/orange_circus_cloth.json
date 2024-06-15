@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "W": {
+      "item": "minecraft:white_wool"
+    },
+    "o": {
+      "item": "minecraft:orange_wool"
+    }
+  },
+  "pattern": [
+    "oW",
+    "oW"
+  ],
+  "result": {
+    "count": 1,
+    "id": "vainglory:orange_circus_cloth"
+  }
+}

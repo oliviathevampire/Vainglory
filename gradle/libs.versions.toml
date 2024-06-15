@@ -1,0 +1,12 @@
+[versions]
+    minecraft = '1.21'
+    fabric-loader = "0.15.11"
+    parchment = "2024.06.02"
+
+    fabric = "0.100.1+1.21"
+
+[libraries]
+    minecraft = { module = 'com.mojang:minecraft', version.ref = 'minecraft' }
+
+    fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
+    fabric_api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric" }
