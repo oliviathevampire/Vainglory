@@ -1,15 +1,14 @@
 package com.oliviathevampire.vainglory;
 
-import com.oliviathevampire.vainglory.init.VGBlocks;
-import com.oliviathevampire.vainglory.init.VGEnchantments;
-import com.oliviathevampire.vainglory.init.VGItemTags;
-import com.oliviathevampire.vainglory.init.VGItems;
+import com.oliviathevampire.vainglory.init.*;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.*;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.ItemModelGenerators;
 import net.minecraft.data.models.model.ModelTemplate;
@@ -81,6 +80,8 @@ public class VaingloryDataGenerator implements DataGeneratorEntrypoint {
 			translationBuilder.addEnchantment(VGEnchantments.EXCAVATOR, "Excavator");
 			translationBuilder.addEnchantment(VGEnchantments.VAINGLORY, "Vainglory");
 			translationBuilder.addEnchantment(VGEnchantments.ORTHOGONAL_KNOCKBACK, "Orthogonal Knockback");
+			translationBuilder.addEnchantment(VGEnchantments.GALE_FORCE, "Gale Force");
+			translationBuilder.addEnchantment(VGEnchantments.BROADSIDE, "Broadside");
 		}
 	}
 

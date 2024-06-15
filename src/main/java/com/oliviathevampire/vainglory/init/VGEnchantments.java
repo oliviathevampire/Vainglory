@@ -13,8 +13,8 @@ public class VGEnchantments {
 	public static final ResourceKey<Enchantment> EXCAVATOR = key("excavator");
 	public static final ResourceKey<Enchantment> VAINGLORY = key("vainglory");
 	public static final ResourceKey<Enchantment> ORTHOGONAL_KNOCKBACK = key("orthogonal_knockback");
-	public static final ResourceKey<Enchantment> EXPLOSIVE_DASH = key("explosive_dash");
-	public static final ResourceKey<Enchantment> EXTENDED_REACH = key("extended_reach");
+	public static final ResourceKey<Enchantment> GALE_FORCE = key("gale_force");
+	public static final ResourceKey<Enchantment> BROADSIDE = key("broadside");
 
 	private static ResourceKey<Enchantment> key(String string) {
 		return ResourceKey.create(Registries.ENCHANTMENT, Vainglory.id(string));

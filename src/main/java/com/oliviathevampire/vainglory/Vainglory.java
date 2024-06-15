@@ -14,7 +14,7 @@ public class Vainglory implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("Hello Fabric world!");
+		LOGGER.info("You're running Vainglory v0.1.0 for 1.21");
 		VGItemTags.init();
 		VGItems.init();
 		VGBlocks.init();
