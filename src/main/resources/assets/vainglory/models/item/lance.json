@@ -8,13 +8,13 @@
             "predicate": {
                 "vainglory:charging": 1.0
             },
-            "model": "block/stone"
+            "model": "vainglory:item/lance_charging"
         },
         {
             "predicate": {
                 "vainglory:dashing": 1.0
             },
-            "model": "block/dirt"
+            "model": "vainglory:item/lance_dashing"
         },
         {
             "predicate": {

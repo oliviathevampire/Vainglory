@@ -116,16 +116,6 @@ public class VaingloryDataGenerator implements DataGeneratorEntrypoint {
 						.unlockedBy("has_" + dyeColor + "_wool", has(BuiltInRegistries.ITEM.get(ResourceLocation.withDefaultNamespace(dyeColor + "_wool"))))
 						.save(exporter, getSimpleRecipeName(block));
 			}
-			ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, VGItems.LANCE)
-					.define('G', Items.GOLD_NUGGET)
-					.define('C', Items.COPPER_INGOT)
-					.define('B', Items.BREEZE_ROD)
-					.pattern(" C ")
-					.pattern("GCG")
-					.pattern(" B ")
-					.unlockedBy("has_breeze_rod", has(Items.BREEZE_ROD))
-					.unlockedBy("has_breeze_rod", has(Items.COPPER_INGOT))
-					.save(exporter, getSimpleRecipeName(VGItems.LANCE));
 		}
 	}
 

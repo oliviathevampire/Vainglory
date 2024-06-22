@@ -8,9 +8,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -177,7 +175,7 @@ public class LanceItem extends Item {
 			world.gameEvent(player, GameEvent.EXPLODE, player.blockPosition());
 		}
 
-		player.causeFallDamage(0, 0, player.damageSources().fall());
+		lance.hurtAndBreak((int) chargeDuration, player, EquipmentSlot.MAINHAND);
 
 		player.getCooldowns().addCooldown(this, (int) ((30 * (1 / maxSpeed * baseSpeed)) + chargeDuration) * 7);
 	}
@@ -216,15 +214,10 @@ public class LanceItem extends Item {
 				int fireAspectLevel = Utils.hasEnchantment(Enchantments.FIRE_ASPECT, player.getUseItem()) ? EnchantmentHelper.getItemEnchantmentLevel(world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FIRE_ASPECT), player.getUseItem()) : 0;
 				attackDamageBonus = (float) baseSpeed + enchantmentLevels.sharpnessLevel;
 				player.attack(entity);
-				Vec3 knockback = new Vec3(entity.getX() - player.getX(), 0, entity.getZ() - player.getZ()).normalize().scale(baseSpeed * 0.5);
 				Vec3 vec3 = entity.position().subtract(player.position());
-				double d = getKnockbackPower(player, entity, vec3, baseSpeed);
-				Vec3 vec32 = vec3.normalize().scale(baseSpeed * 0.5);
-//				entity.push(vec32.x, 0.7F, vec32.z);
-				if (entity instanceof ServerPlayer serverPlayer) {
-					serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(serverPlayer));
-				}
-				entity.setDeltaMovement(vec32.x, vec32.y, vec32.z);
+				double d = getKnockbackPower(player, entity, vec3, baseSpeed * 0.5);
+				Vec3 vec32 = vec3.normalize().scale(d);
+				entity.push(vec32.x, vec32.y, vec32.z);
 				if (fireAspectLevel > 0) entity.igniteForSeconds(fireAspectLevel + 3);
 				skeweredCount++;
 			} else {
