@@ -3,6 +3,7 @@ package com.oliviathevampire.vainglory;
 import com.oliviathevampire.vainglory.init.VGBlocks;
 import com.oliviathevampire.vainglory.init.VGItemTags;
 import com.oliviathevampire.vainglory.init.VGItems;
+import com.oliviathevampire.vainglory.init.VGLoot;
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.resources.ResourceLocation;
@@ -18,6 +19,7 @@ public class Vainglory implements ModInitializer {
 		VGItemTags.init();
 		VGItems.init();
 		VGBlocks.init();
+		VGLoot.init();
 	}
 
 	public static ResourceLocation id(String id) {
