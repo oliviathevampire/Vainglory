@@ -6,15 +6,17 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 public class VGEnchantments {
+	//Non-Treasure
 	public static final ResourceKey<Enchantment> SKEWERING  = key("skewering");
 	public static final ResourceKey<Enchantment> CAVALIER = key("cavalier");
 	public static final ResourceKey<Enchantment> INTREPID = key("intrepid");
+
+	public static final ResourceKey<Enchantment> GALE_FORCE = key("gale_force");
+	public static final ResourceKey<Enchantment> BROADSIDE = key("broadside");
+	//Treasure
 	public static final ResourceKey<Enchantment> WIND_RIDER = key("wind_rider");
 	public static final ResourceKey<Enchantment> EXCAVATOR = key("excavator");
 	public static final ResourceKey<Enchantment> VAINGLORY = key("vainglory");
-	public static final ResourceKey<Enchantment> ORTHOGONAL_KNOCKBACK = key("orthogonal_knockback");
-	public static final ResourceKey<Enchantment> GALE_FORCE = key("gale_force");
-	public static final ResourceKey<Enchantment> BROADSIDE = key("broadside");
 
 	private static ResourceKey<Enchantment> key(String string) {
 		return ResourceKey.create(Registries.ENCHANTMENT, Vainglory.id(string));

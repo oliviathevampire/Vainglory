@@ -2,25 +2,5 @@
     "parent": "minecraft:item/handheld",
     "textures": {
         "layer0": "vainglory:item/lance"
-    },
-    "overrides": [
-        {
-            "predicate": {
-                "vainglory:charging": 1.0
-            },
-            "model": "vainglory:item/lance_charging"
-        },
-        {
-            "predicate": {
-                "vainglory:dashing": 1.0
-            },
-            "model": "vainglory:item/lance_dashing"
-        },
-        {
-            "predicate": {
-                "vainglory:in_hand": 1.0
-            },
-            "model": "vainglory:item/lance_hand"
-        }
-    ]
+    }
 }

@@ -6,7 +6,7 @@ plugins {
 	id 'fabric-loom' version '1.6-SNAPSHOT'
 }
 
-version = project.mod_version
+version = "$mod_version+build.$build_number-$project.minecraft_version"
 group = project.maven_group
 
 base {

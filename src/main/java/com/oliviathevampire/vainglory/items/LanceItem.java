@@ -60,7 +60,7 @@ public class LanceItem extends Item {
 
 	static ItemAttributeModifiers createAttributes() {
 		return ItemAttributeModifiers.builder()
-				.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_ID, 3.0F, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
+				.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_ID, 5.0F, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
 				.add(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_ID, -3.4F, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
 				.add(Attributes.ENTITY_INTERACTION_RANGE, new AttributeModifier(Vainglory.id("lance_entity_interaction"), 0.6f, AttributeModifier.Operation.ADD_VALUE),
 						EquipmentSlotGroup.MAINHAND
@@ -114,7 +114,7 @@ public class LanceItem extends Item {
 
 	@Override
 	public UseAnim getUseAnimation(ItemStack stack) {
-		return UseAnim.BOW;
+		return UseAnim.SPEAR;
 	}
 
 	@Override
@@ -230,8 +230,8 @@ public class LanceItem extends Item {
 			}
 
 			// Orthogonal knockback
-			if (enchantmentLevels.orthogonalKnockbackLevel > 0) {
-				Vec3 orthogonalKnockback = dashVec.cross(new Vec3(0, 1, 0)).normalize().scale(baseSpeed * 0.5 * enchantmentLevels.orthogonalKnockbackLevel);
+			if (enchantmentLevels.galeForceLevel > 0) {
+				Vec3 orthogonalKnockback = dashVec.cross(new Vec3(0, 1, 0)).normalize().scale(baseSpeed * 0.5 * enchantmentLevels.galeForceLevel);
 				entity.setDeltaMovement(orthogonalKnockback.x, orthogonalKnockback.y, orthogonalKnockback.z);
 			}
 
@@ -251,11 +251,10 @@ public class LanceItem extends Item {
 		int windRiderLevel = getEnchantmentLevel(VGEnchantments.WIND_RIDER, lance, enchantmentRegistryLookup);
 		int excavatorLevel = getEnchantmentLevel(VGEnchantments.EXCAVATOR, lance, enchantmentRegistryLookup);
 		int vaingloryLevel = getEnchantmentLevel(VGEnchantments.VAINGLORY, lance, enchantmentRegistryLookup);
-		int orthogonalKnockbackLevel = getEnchantmentLevel(VGEnchantments.ORTHOGONAL_KNOCKBACK, lance, enchantmentRegistryLookup);
 		int galeForceLevel = getEnchantmentLevel(VGEnchantments.GALE_FORCE, lance, enchantmentRegistryLookup);
 		int broadsideLevel = getEnchantmentLevel(VGEnchantments.BROADSIDE, lance, enchantmentRegistryLookup);
 
-		return new EnchantmentLevels(skeweringLevel, cavalierLevel, intrepidLevel, sharpnessLevel, windRiderLevel, excavatorLevel, vaingloryLevel, orthogonalKnockbackLevel, galeForceLevel, broadsideLevel);
+		return new EnchantmentLevels(skeweringLevel, cavalierLevel, intrepidLevel, sharpnessLevel, windRiderLevel, excavatorLevel, vaingloryLevel, galeForceLevel, broadsideLevel);
 	}
 
 	private int getEnchantmentLevel(ResourceKey<Enchantment> enchantment, ItemStack itemStack, HolderLookup.RegistryLookup<Enchantment> enchantmentRegistryLookup) {
@@ -271,7 +270,6 @@ public class LanceItem extends Item {
 	}
 
 	private static record EnchantmentLevels(int skeweringLevel, int cavalierLevel, int intrepidLevel, int sharpnessLevel, int windRiderLevel,
-											int excavatorLevel, int vaingloryLevel, int orthogonalKnockbackLevel, int galeForceLevel,
-											int broadsideLevel) { }
+											int excavatorLevel, int vaingloryLevel, int galeForceLevel, int broadsideLevel) { }
 
 }

@@ -1,0 +1,15 @@
+{
+    "required": true,
+    "package": "com.oliviathevampire.vainglory.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "mixins": [
+        "ItemRendererAccessor"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    },
+    "client": [
+        "ItemRendererMixin",
+        "ModelBakeryMixin"
+    ]
+}
