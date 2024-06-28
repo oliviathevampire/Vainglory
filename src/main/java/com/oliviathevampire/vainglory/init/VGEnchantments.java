@@ -18,6 +18,9 @@ public class VGEnchantments {
 	public static final ResourceKey<Enchantment> EXCAVATOR = key("excavator");
 	public static final ResourceKey<Enchantment> VAINGLORY = key("vainglory");
 
+	public static final ResourceKey<Enchantment> BREACH = key("lance_breach");
+	public static final ResourceKey<Enchantment> QUICK_CHARGE = key("lance_quick_charge");
+
 	private static ResourceKey<Enchantment> key(String string) {
 		return ResourceKey.create(Registries.ENCHANTMENT, Vainglory.id(string));
 	}

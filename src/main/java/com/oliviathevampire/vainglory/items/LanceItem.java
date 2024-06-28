@@ -10,6 +10,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -49,7 +51,7 @@ public class LanceItem extends Item {
 	private static final int DASH_DURATION = 5;
 	private static final int MAX_USE_DURATION = 72000;
 
-	private float attackDamageBonus = 0.0f;
+	private float attackDamageBonus = 9.0f;
 
 	public LanceItem(Properties properties) {
 		super(properties.attributes(createAttributes())
@@ -62,7 +64,7 @@ public class LanceItem extends Item {
 		return ItemAttributeModifiers.builder()
 				.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_ID, 5.0F, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
 				.add(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_ID, -3.4F, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
-				.add(Attributes.ENTITY_INTERACTION_RANGE, new AttributeModifier(Vainglory.id("lance_entity_interaction"), 0.6f, AttributeModifier.Operation.ADD_VALUE),
+				.add(Attributes.ENTITY_INTERACTION_RANGE, new AttributeModifier(Vainglory.id("lance_entity_interaction"), 1f, AttributeModifier.Operation.ADD_VALUE),
 						EquipmentSlotGroup.MAINHAND
 				).build();
 	}
@@ -92,10 +94,14 @@ public class LanceItem extends Item {
 	@Override
 	public void releaseUsing(ItemStack stack, Level level, LivingEntity livingEntity, int timeCharged) {
 		if (livingEntity instanceof Player player) {
-			int i = this.getUseDuration(stack, livingEntity) - timeCharged;
-			float power = getChargeForTime(i);
+			int chargeTime = this.getUseDuration(stack, livingEntity) - timeCharged;
+			EnchantmentLevels enchantmentLevels = getEnchantmentLevels(stack, level);
+			float f = EnchantmentHelper.modifyCrossbowChargingTime(stack, livingEntity, 1.25F);
+//			chargeTime += Mth.floor(f * 20.0F);
+			chargeTime = adjustChargeTimeForQuickCharge(chargeTime, enchantmentLevels.quickChargeLevel);
+			float power = getChargeForTime(chargeTime);
 			if (power >= 0.1) {
-				dash(player, level, power);
+				dash(player, level, power, enchantmentLevels);
 				player.playSound(SoundEvents.TRIDENT_RETURN, 1.0F, 1.0F);
 			}
 		}
@@ -109,7 +115,8 @@ public class LanceItem extends Item {
 
 	@Override
 	public int getUseDuration(ItemStack itemStack, LivingEntity livingEntity) {
-		return MAX_USE_DURATION; // Max use duration
+		EnchantmentLevels enchantmentLevels = getEnchantmentLevels(itemStack, livingEntity.level());
+		return adjustChargeTimeForQuickCharge(MAX_USE_DURATION, enchantmentLevels.quickChargeLevel);
 	}
 
 	@Override
@@ -122,7 +129,7 @@ public class LanceItem extends Item {
 		return attackDamageBonus;
 	}
 
-	private void dash(Player player, Level world, float chargeDuration) {
+	private void dash(Player player, Level world, float chargeDuration, EnchantmentLevels enchantmentLevels) {
 		Vec3 look = player.getViewVector(1.0f);
 		double baseSpeed = BASE_SPEED * (chargeDuration * 5);
 		double maxSpeed = MAX_SPEED * (chargeDuration * 5);
@@ -130,7 +137,6 @@ public class LanceItem extends Item {
 		double dashDuration = DASH_DURATION;
 
 		ItemStack lance = player.getMainHandItem();
-		EnchantmentLevels enchantmentLevels = getEnchantmentLevels(lance, world);
 
 		if (enchantmentLevels.intrepidLevel > 0) {
 			acceleration += ACCELERATION_INCREMENT * enchantmentLevels.intrepidLevel;
@@ -142,7 +148,7 @@ public class LanceItem extends Item {
 			player.setNoGravity(true);
 		}
 
-		Vec3 dashVec = new Vec3(look.x * baseSpeed, Math.min(look.y * 0.2, 0.2), look.z * baseSpeed); // Limit vertical movement
+		Vec3 dashVec = new Vec3(look.x * baseSpeed, Math.min(look.y * 0.2, 0.4), look.z * baseSpeed); // Limit vertical movement
 		for (int i = 0; i < dashDuration; i++) {
 			if (player.isPassenger() && player.getControlledVehicle().hasExactlyOnePlayerPassenger()) {
 				player.getControlledVehicle().addDeltaMovement(dashVec);
@@ -180,6 +186,13 @@ public class LanceItem extends Item {
 		player.getCooldowns().addCooldown(this, (int) ((30 * (1 / maxSpeed * baseSpeed)) + chargeDuration) * 7);
 	}
 
+	private int adjustChargeTimeForQuickCharge(int chargeTime, int quickChargeLevel) {
+		if (quickChargeLevel > 0) {
+			chargeTime -= quickChargeLevel * 5; // Reduce charge time by 5 ticks per level of Quick Charge
+		}
+		return Math.max(chargeTime, 0); // Ensure charge time doesn't go below 0
+	}
+
 	@Override
 	public boolean isValidRepairItem(ItemStack stack, ItemStack repairCandidate) {
 		return repairCandidate.is(Items.BREEZE_ROD);
@@ -200,7 +213,7 @@ public class LanceItem extends Item {
 		// Check for collisions with entities in front of the player
 		double reach = 1.0 + (enchantmentLevels.broadsideLevel * 0.5);
 		Vec3 forward = player.getViewVector(1.0F).normalize().scale(reach);
-		AABB hitbox = new AABB(player.position(), player.position().add(forward));
+		AABB hitbox = new AABB(player.position().subtract(0.5, 0.5, 0.5), player.position().scale(reach));
 
 		List<LivingEntity> entities = world.getEntitiesOfClass(LivingEntity.class, hitbox, entity -> entity != player);
 		int skeweredCount = 0;
@@ -211,9 +224,18 @@ public class LanceItem extends Item {
 			}
 
 			if (skeweredCount < (3 + enchantmentLevels.skeweringLevel)) {
-				int fireAspectLevel = Utils.hasEnchantment(Enchantments.FIRE_ASPECT, player.getUseItem()) ? EnchantmentHelper.getItemEnchantmentLevel(world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FIRE_ASPECT), player.getUseItem()) : 0;
-				attackDamageBonus = (float) baseSpeed + enchantmentLevels.sharpnessLevel;
+				int fireAspectLevel = getFireAspectLevel(player, world);
+
+				float attackDamageBonus = (float) baseSpeed + enchantmentLevels.sharpnessLevel;
+
+				AttributeInstance attackDamageAttribute = player.getAttribute(Attributes.ATTACK_DAMAGE);
+				double originalAttackDamage = attackDamageAttribute.getBaseValue();
+				attackDamageAttribute.setBaseValue(originalAttackDamage + attackDamageBonus);
+
 				player.attack(entity);
+
+				attackDamageAttribute.setBaseValue(originalAttackDamage);
+
 				Vec3 vec3 = entity.position().subtract(player.position());
 				double d = getKnockbackPower(player, entity, vec3, baseSpeed * 0.5);
 				Vec3 vec32 = vec3.normalize().scale(d);
@@ -241,6 +263,16 @@ public class LanceItem extends Item {
 		}
 	}
 
+	private int getFireAspectLevel(Player player, Level world) {
+		if (Utils.hasEnchantment(Enchantments.FIRE_ASPECT, player.getUseItem())) {
+			return EnchantmentHelper.getItemEnchantmentLevel(
+					world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FIRE_ASPECT),
+					player.getUseItem()
+			);
+		}
+		return 0;
+	}
+
 	private EnchantmentLevels getEnchantmentLevels(ItemStack lance, Level world) {
 		HolderLookup.RegistryLookup<Enchantment> enchantmentRegistryLookup = world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
 
@@ -253,9 +285,12 @@ public class LanceItem extends Item {
 		int vaingloryLevel = getEnchantmentLevel(VGEnchantments.VAINGLORY, lance, enchantmentRegistryLookup);
 		int galeForceLevel = getEnchantmentLevel(VGEnchantments.GALE_FORCE, lance, enchantmentRegistryLookup);
 		int broadsideLevel = getEnchantmentLevel(VGEnchantments.BROADSIDE, lance, enchantmentRegistryLookup);
+		int quickChargeLevel = getEnchantmentLevel(VGEnchantments.QUICK_CHARGE, lance, enchantmentRegistryLookup);
+		int breachLevel = getEnchantmentLevel(VGEnchantments.BREACH, lance, enchantmentRegistryLookup);
 
-		return new EnchantmentLevels(skeweringLevel, cavalierLevel, intrepidLevel, sharpnessLevel, windRiderLevel, excavatorLevel, vaingloryLevel, galeForceLevel, broadsideLevel);
+		return new EnchantmentLevels(skeweringLevel, cavalierLevel, intrepidLevel, sharpnessLevel, windRiderLevel, excavatorLevel, vaingloryLevel, galeForceLevel, broadsideLevel, quickChargeLevel, breachLevel);
 	}
+
 
 	private int getEnchantmentLevel(ResourceKey<Enchantment> enchantment, ItemStack itemStack, HolderLookup.RegistryLookup<Enchantment> enchantmentRegistryLookup) {
 		return Utils.hasEnchantment(enchantment, itemStack) ? EnchantmentHelper.getItemEnchantmentLevel(enchantmentRegistryLookup.getOrThrow(enchantment), itemStack) : 0;
@@ -270,6 +305,8 @@ public class LanceItem extends Item {
 	}
 
 	private static record EnchantmentLevels(int skeweringLevel, int cavalierLevel, int intrepidLevel, int sharpnessLevel, int windRiderLevel,
-											int excavatorLevel, int vaingloryLevel, int galeForceLevel, int broadsideLevel) { }
+											int excavatorLevel, int vaingloryLevel, int galeForceLevel, int broadsideLevel, int quickChargeLevel,
+											int breachLevel) { }
+
 
 }
