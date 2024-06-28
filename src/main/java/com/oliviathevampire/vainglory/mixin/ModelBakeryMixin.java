@@ -1,6 +1,6 @@
 package com.oliviathevampire.vainglory.mixin;
 
-import com.oliviathevampire.vainglory.Vainglory;
+import com.oliviathevampire.vainglory.client.VaingloryClient;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.resources.model.BlockStateModelLoader;
@@ -24,6 +24,6 @@ public abstract class ModelBakeryMixin {
 
     @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/model/ModelBakery;loadSpecialItemModelAndDependencies(Lnet/minecraft/client/resources/model/ModelResourceLocation;)V", ordinal = 0))
     public void addBigItemModels(BlockColors blockColors, ProfilerFiller profilerFiller, Map<ResourceLocation, BlockModel> modelResources, Map<ResourceLocation, List<BlockStateModelLoader.LoadedJson>> blockStateResources, CallbackInfo ci) {
-        loadSpecialItemModelAndDependencies(ModelResourceLocation.inventory(Vainglory.id("lance_big")));
+        VaingloryClient.BIG_MODELS.values().forEach(this::loadSpecialItemModelAndDependencies);
     }
 }

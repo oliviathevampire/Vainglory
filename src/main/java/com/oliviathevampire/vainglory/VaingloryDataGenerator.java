@@ -49,7 +49,6 @@ public class VaingloryDataGenerator implements DataGeneratorEntrypoint {
 		@Override
 		protected void addTags(HolderLookup.Provider wrapperLookup) {
 			this.tag(ItemTags.SWORD_ENCHANTABLE).add(reverseLookup(VGItems.LANCE));
-			this.tag(ItemTags.MACE_ENCHANTABLE).add(reverseLookup(VGItems.LANCE));
 			this.tag(ItemTags.DURABILITY_ENCHANTABLE).add(reverseLookup(VGItems.LANCE));
 			this.tag(ItemTags.FIRE_ASPECT_ENCHANTABLE).add(reverseLookup(VGItems.LANCE));
 			this.tag(ItemTags.SHARP_WEAPON_ENCHANTABLE).add(reverseLookup(VGItems.LANCE));
