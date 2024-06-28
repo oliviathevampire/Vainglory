@@ -22,6 +22,9 @@
 		],
 		"fabric-datagen": [
 			"com.oliviathevampire.vainglory.VaingloryDataGenerator"
+		],
+		"client": [
+			"com.oliviathevampire.vainglory.client.VaingloryClient"
 		]
 	},
 	"mixins": [

@@ -99,27 +99,35 @@ public class LanceItem extends Item {
 		if (livingEntity instanceof Player player) {
 			int chargeTime = this.getUseDuration(stack, livingEntity) - timeCharged;
 			EnchantmentLevels enchantmentLevels = getEnchantmentLevels(stack, level);
-			float f = EnchantmentHelper.modifyCrossbowChargingTime(stack, livingEntity, 1.25F);
-//			chargeTime += Mth.floor(f * 20.0F);
-			chargeTime = adjustChargeTimeForQuickCharge(chargeTime, enchantmentLevels.getEnchantmentLevel(Enchantments.QUICK_CHARGE));
-			float power = getChargeForTime(chargeTime);
-			if (power >= 0.1) {
-				dash(player, level, power, enchantmentLevels);
+			float power = getChargeForTime(chargeTime, enchantmentLevels);
+			float f = getPowerForTime(chargeTime, stack, livingEntity);
+			System.out.println(f);
+			if (f >= 0.4F) {
+				dash(player, level, f, enchantmentLevels);
 				player.playSound(SoundEvents.TRIDENT_RETURN, 1.0F, 1.0F);
 			}
 		}
 	}
 
-	protected float getChargeForTime(int charge) {
-		float f = (float) charge / 20.0F;
+	protected float getChargeForTime(int charge, EnchantmentLevels enchantmentLevels) {
+		float f = (float) charge / (80.0F / (enchantmentLevels.getEnchantmentLevel(Enchantments.QUICK_CHARGE)));
 		f = (f * f + f * 2.0F) / 3.0F;
-		return Math.min(f, 10.0F);
+		return Math.min(f, 30.0F);
 	}
 
 	@Override
 	public int getUseDuration(ItemStack itemStack, LivingEntity livingEntity) {
-		EnchantmentLevels enchantmentLevels = getEnchantmentLevels(itemStack, livingEntity.level());
-		return adjustChargeTimeForQuickCharge(MAX_USE_DURATION, enchantmentLevels.getEnchantmentLevel(Enchantments.QUICK_CHARGE));
+		return MAX_USE_DURATION;
+	}
+
+	public static int getChargeDuration(ItemStack itemStack, LivingEntity livingEntity) {
+		float f = EnchantmentHelper.modifyCrossbowChargingTime(itemStack, livingEntity, 1.25F);
+		return Math.min(Mth.floor(f * 20.0F), MAX_USE_DURATION);
+	}
+
+	private static float getPowerForTime(int i, ItemStack itemStack, LivingEntity livingEntity) {
+		float f = (float)i / (float)getChargeDuration(itemStack, livingEntity);
+		return f;
 	}
 
 	@Override
@@ -177,7 +185,8 @@ public class LanceItem extends Item {
 							return 0.0F;
 						}
 					}, player.getX(), player.getY(), player.getZ(),
-					1.0f + enchantmentLevels.getEnchantmentLevel(VGEnchantments.GALE_FORCE), false, Level.ExplosionInteraction.NONE,
+					1.0f + enchantmentLevels.getEnchantmentLevel(VGEnchantments.GALE_FORCE),
+					false, Level.ExplosionInteraction.NONE,
 					ParticleTypes.GUST_EMITTER_SMALL,
 					ParticleTypes.GUST_EMITTER_LARGE,
 					SoundEvents.WIND_CHARGE_BURST
@@ -190,19 +199,12 @@ public class LanceItem extends Item {
 		player.getCooldowns().addCooldown(this, (int) ((30 * (1 / maxSpeed * baseSpeed)) + chargeDuration) * 7);
 	}
 
-	private int adjustChargeTimeForQuickCharge(int chargeTime, int quickChargeLevel) {
-		if (quickChargeLevel > 0) {
-			chargeTime -= quickChargeLevel * 5; // Reduce charge time by 5 ticks per level of Quick Charge
-		}
-		return Math.max(chargeTime, 0); // Ensure charge time doesn't go below 0
-	}
-
 	@Override
 	public boolean isValidRepairItem(ItemStack stack, ItemStack repairCandidate) {
 		return repairCandidate.is(Items.BREEZE_ROD);
 	}
 
-	private static double getKnockbackPower(Player player, LivingEntity entity, Vec3 entityPos, double speed) {
+	private static double getKnockbackPower(LivingEntity entity, Vec3 entityPos) {
 		return (3.5 - entityPos.length()) * 0.7F * (1.0 - entity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
 	}
 
@@ -239,7 +241,7 @@ public class LanceItem extends Item {
 				attackDamageAttribute.setBaseValue(originalAttackDamage);
 
 				Vec3 vec3 = entity.position().subtract(player.position());
-				double d = getKnockbackPower(player, entity, vec3, baseSpeed * 0.5);
+				double d = getKnockbackPower(entity, vec3);
 				Vec3 vec32 = vec3.normalize().scale(d);
 				entity.push(vec32.x, vec32.y, vec32.z);
 				skeweredCount++;
@@ -264,17 +266,6 @@ public class LanceItem extends Item {
 		}
 	}
 
-	private int getFireAspectLevel(Player player, Level world) {
-		EnchantmentLevels levels = getEnchantmentLevels(player.getUseItem(), world);
-		/*if (Utils.hasEnchantment(Enchantments.FIRE_ASPECT, player.getUseItem())) {
-			return EnchantmentHelper.getItemEnchantmentLevel(
-					world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FIRE_ASPECT),
-					player.getUseItem()
-			);
-		}*/
-		return levels.getEnchantmentLevel(Enchantments.FIRE_ASPECT);
-	}
-
 	private EnchantmentLevels getEnchantmentLevels(ItemStack stack, Level world) {
 		HolderLookup.RegistryLookup<Enchantment> enchantmentRegistryLookup = world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
 		Map<ResourceKey<Enchantment>, Integer> enchantments = new HashMap<>();
@@ -282,22 +273,22 @@ public class LanceItem extends Item {
 		addEnchantmentToMap(VGEnchantments.SKEWERING, stack, enchantmentRegistryLookup, enchantments);
 		addEnchantmentToMap(VGEnchantments.CAVALIER, stack, enchantmentRegistryLookup, enchantments);
 		addEnchantmentToMap(VGEnchantments.INTREPID, stack, enchantmentRegistryLookup, enchantments);
-		addEnchantmentToMap(Enchantments.SHARPNESS, stack, enchantmentRegistryLookup, enchantments);
 		addEnchantmentToMap(VGEnchantments.WIND_RIDER, stack, enchantmentRegistryLookup, enchantments);
 		addEnchantmentToMap(VGEnchantments.EXCAVATOR, stack, enchantmentRegistryLookup, enchantments);
 		addEnchantmentToMap(VGEnchantments.VAINGLORY, stack, enchantmentRegistryLookup, enchantments);
 		addEnchantmentToMap(VGEnchantments.GALE_FORCE, stack, enchantmentRegistryLookup, enchantments);
 		addEnchantmentToMap(VGEnchantments.BROADSIDE, stack, enchantmentRegistryLookup, enchantments);
-		addEnchantmentToMap(VGEnchantments.QUICK_CHARGE, stack, enchantmentRegistryLookup, enchantments);
-		addEnchantmentToMap(VGEnchantments.BREACH, stack, enchantmentRegistryLookup, enchantments);
+
+		addEnchantmentToMap(Enchantments.QUICK_CHARGE, stack, enchantmentRegistryLookup, enchantments);
+		addEnchantmentToMap(Enchantments.BREACH, stack, enchantmentRegistryLookup, enchantments);
+		addEnchantmentToMap(Enchantments.SHARPNESS, stack, enchantmentRegistryLookup, enchantments);
 
 		return new EnchantmentLevels(enchantments);
 	}
 
-
 	private void addEnchantmentToMap(ResourceKey<Enchantment> enchantment, ItemStack itemStack,
-									HolderLookup.RegistryLookup<Enchantment> enchantmentRegistryLookup,
-									Map<ResourceKey<Enchantment>, Integer> enchantments) {
+									 HolderLookup.RegistryLookup<Enchantment> enchantmentRegistryLookup,
+									 Map<ResourceKey<Enchantment>, Integer> enchantments) {
 
 		if (itemStack.has(DataComponents.STORED_ENCHANTMENTS)) {
 			ItemEnchantments itemEnchantments = itemStack.get(DataComponents.STORED_ENCHANTMENTS);
@@ -327,5 +318,4 @@ public class LanceItem extends Item {
 			return 0;
 		}
 	}
-
 }

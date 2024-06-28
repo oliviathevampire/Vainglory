@@ -1,5 +1,6 @@
 package com.oliviathevampire.vainglory;
 
+import com.oliviathevampire.vainglory.init.VGEnchantments;
 import com.oliviathevampire.vainglory.init.VGItemTags;
 import com.oliviathevampire.vainglory.init.VGItems;
 import com.oliviathevampire.vainglory.init.VGLoot;
@@ -24,6 +25,7 @@ public class Vainglory implements ModInitializer {
 		VGItemTags.init();
 		VGItems.init();
 		VGLoot.init();
+		VGEnchantments.init();
 	}
 
 	public static ResourceLocation id(String id) {

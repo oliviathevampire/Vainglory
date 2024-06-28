@@ -1,6 +1,5 @@
 package com.oliviathevampire.vainglory.mixin;
 
-import com.oliviathevampire.vainglory.Vainglory;
 import com.oliviathevampire.vainglory.client.VaingloryClient;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.block.model.BlockModel;
