@@ -3,8 +3,6 @@
     "values": [
         "vainglory:skewering",
         "vainglory:cavalier",
-        "vainglory:intrepid",
-        "vainglory:lance_breach",
-        "vainglory:lance_quick_charge"
+        "vainglory:intrepid"
     ]
 }

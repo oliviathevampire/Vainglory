@@ -22,10 +22,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -285,8 +282,8 @@ public class LanceItem extends Item {
 		int vaingloryLevel = getEnchantmentLevel(VGEnchantments.VAINGLORY, lance, enchantmentRegistryLookup);
 		int galeForceLevel = getEnchantmentLevel(VGEnchantments.GALE_FORCE, lance, enchantmentRegistryLookup);
 		int broadsideLevel = getEnchantmentLevel(VGEnchantments.BROADSIDE, lance, enchantmentRegistryLookup);
-		int quickChargeLevel = getEnchantmentLevel(VGEnchantments.QUICK_CHARGE, lance, enchantmentRegistryLookup);
-		int breachLevel = getEnchantmentLevel(VGEnchantments.BREACH, lance, enchantmentRegistryLookup);
+		int quickChargeLevel = getEnchantmentLevel(Enchantments.QUICK_CHARGE, lance, enchantmentRegistryLookup);
+		int breachLevel = getEnchantmentLevel(Enchantments.BREACH, lance, enchantmentRegistryLookup);
 
 		return new EnchantmentLevels(skeweringLevel, cavalierLevel, intrepidLevel, sharpnessLevel, windRiderLevel, excavatorLevel, vaingloryLevel, galeForceLevel, broadsideLevel, quickChargeLevel, breachLevel);
 	}
