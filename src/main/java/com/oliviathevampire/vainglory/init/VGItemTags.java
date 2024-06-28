@@ -7,6 +7,7 @@ import net.minecraft.world.item.Item;
 
 public class VGItemTags {
 	public static final TagKey<Item> LANCE_ENCHANTABLE = bind("enchantable/lance");
+	public static final TagKey<Item> AXE_OF_CLEAVING_ENCHANTABLE = bind("enchantable/axe_of_cleaving");
 
 	public static void init() {}
 

@@ -4,13 +4,13 @@ import com.oliviathevampire.vainglory.Vainglory;
 import com.oliviathevampire.vainglory.init.VGEnchantments;
 import com.oliviathevampire.vainglory.utils.Utils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
@@ -31,6 +31,7 @@ import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
@@ -39,7 +40,9 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LanceItem extends Item {
 
@@ -56,7 +59,7 @@ public class LanceItem extends Item {
 	public LanceItem(Properties properties) {
 		super(properties.attributes(createAttributes())
 				.component(DataComponents.TOOL, createToolProperties())
-				.durability(400)
+				.durability(750)
 		);
 	}
 
@@ -98,7 +101,7 @@ public class LanceItem extends Item {
 			EnchantmentLevels enchantmentLevels = getEnchantmentLevels(stack, level);
 			float f = EnchantmentHelper.modifyCrossbowChargingTime(stack, livingEntity, 1.25F);
 //			chargeTime += Mth.floor(f * 20.0F);
-			chargeTime = adjustChargeTimeForQuickCharge(chargeTime, enchantmentLevels.quickChargeLevel);
+			chargeTime = adjustChargeTimeForQuickCharge(chargeTime, enchantmentLevels.getEnchantmentLevel(Enchantments.QUICK_CHARGE));
 			float power = getChargeForTime(chargeTime);
 			if (power >= 0.1) {
 				dash(player, level, power, enchantmentLevels);
@@ -116,7 +119,7 @@ public class LanceItem extends Item {
 	@Override
 	public int getUseDuration(ItemStack itemStack, LivingEntity livingEntity) {
 		EnchantmentLevels enchantmentLevels = getEnchantmentLevels(itemStack, livingEntity.level());
-		return adjustChargeTimeForQuickCharge(MAX_USE_DURATION, enchantmentLevels.quickChargeLevel);
+		return adjustChargeTimeForQuickCharge(MAX_USE_DURATION, enchantmentLevels.getEnchantmentLevel(Enchantments.QUICK_CHARGE));
 	}
 
 	@Override
@@ -138,12 +141,13 @@ public class LanceItem extends Item {
 
 		ItemStack lance = player.getMainHandItem();
 
-		if (enchantmentLevels.intrepidLevel > 0) {
-			acceleration += ACCELERATION_INCREMENT * enchantmentLevels.intrepidLevel;
-			maxSpeed += MAX_SPEED_INCREMENT * enchantmentLevels.intrepidLevel;
+		int intrepidLevel = enchantmentLevels.getEnchantmentLevel(VGEnchantments.INTREPID);
+		if (intrepidLevel > 0) {
+			acceleration += ACCELERATION_INCREMENT * intrepidLevel;
+			maxSpeed += MAX_SPEED_INCREMENT * intrepidLevel;
 		}
 
-		if (enchantmentLevels.windRiderLevel > 0) {
+		if (enchantmentLevels.getEnchantmentLevel(VGEnchantments.WIND_RIDER) > 0) {
 			dashDuration = 10;
 			player.setNoGravity(true);
 		}
@@ -161,19 +165,19 @@ public class LanceItem extends Item {
 			handleCollisions(player, world, baseSpeed, dashVec, enchantmentLevels);
 		}
 
-		if (enchantmentLevels.windRiderLevel > 0) {
+		if (enchantmentLevels.getEnchantmentLevel(VGEnchantments.WIND_RIDER) > 0) {
 			player.setNoGravity(false);
 		}
 
 		// Trigger explosion/particle effect on wall collision
-		if (world.getBlockState(player.blockPosition().below()).isSolid() && enchantmentLevels.galeForceLevel > 0) {
+		if (world.getBlockState(player.blockPosition().below()).isSolid() && enchantmentLevels.getEnchantmentLevel(VGEnchantments.GALE_FORCE) > 0) {
 			world.explode(player, null, new ExplosionDamageCalculator() {
 						@Override
 						public float getEntityDamageAmount(Explosion explosion, Entity entity) {
 							return 0.0F;
 						}
 					}, player.getX(), player.getY(), player.getZ(),
-					1.0f + enchantmentLevels.galeForceLevel, false, Level.ExplosionInteraction.NONE,
+					1.0f + enchantmentLevels.getEnchantmentLevel(VGEnchantments.GALE_FORCE), false, Level.ExplosionInteraction.NONE,
 					ParticleTypes.GUST_EMITTER_SMALL,
 					ParticleTypes.GUST_EMITTER_LARGE,
 					SoundEvents.WIND_CHARGE_BURST
@@ -206,12 +210,12 @@ public class LanceItem extends Item {
 		BlockPos pos = player.blockPosition();
 		BlockState state = world.getBlockState(pos);
 
-		if (enchantmentLevels.excavatorLevel > 0 && !world.isEmptyBlock(pos) && state.getDestroySpeed(world, pos) <= (1.5 * enchantmentLevels.excavatorLevel)) {
+		if (enchantmentLevels.getEnchantmentLevel(VGEnchantments.EXCAVATOR) > 0 && !world.isEmptyBlock(pos) && state.getDestroySpeed(world, pos) <= (1.5 * enchantmentLevels.getEnchantmentLevel(VGEnchantments.EXCAVATOR))) {
 			world.destroyBlock(pos, true);
 		}
 
 		// Check for collisions with entities in front of the player
-		double reach = 1.0 + (enchantmentLevels.broadsideLevel * 0.5);
+		double reach = 1.0 + (enchantmentLevels.getEnchantmentLevel(VGEnchantments.BROADSIDE) * 0.5);
 		Vec3 forward = player.getViewVector(1.0F).normalize().scale(reach);
 		AABB hitbox = new AABB(player.position().subtract(0.5, 0.5, 0.5), player.position().scale(reach));
 
@@ -223,14 +227,12 @@ public class LanceItem extends Item {
 				continue;
 			}
 
-			if (skeweredCount < (3 + enchantmentLevels.skeweringLevel)) {
-				int fireAspectLevel = getFireAspectLevel(player, world);
-
-				float attackDamageBonus = (float) baseSpeed + enchantmentLevels.sharpnessLevel;
+			if (skeweredCount < (3 + enchantmentLevels.getEnchantmentLevel(VGEnchantments.SKEWERING))) {
+				float attackDamageBonus1 = attackDamageBonus + (float) baseSpeed + enchantmentLevels.getEnchantmentLevel(Enchantments.SHARPNESS);
 
 				AttributeInstance attackDamageAttribute = player.getAttribute(Attributes.ATTACK_DAMAGE);
 				double originalAttackDamage = attackDamageAttribute.getBaseValue();
-				attackDamageAttribute.setBaseValue(originalAttackDamage + attackDamageBonus);
+				attackDamageAttribute.setBaseValue(originalAttackDamage + attackDamageBonus1);
 
 				player.attack(entity);
 
@@ -240,60 +242,73 @@ public class LanceItem extends Item {
 				double d = getKnockbackPower(player, entity, vec3, baseSpeed * 0.5);
 				Vec3 vec32 = vec3.normalize().scale(d);
 				entity.push(vec32.x, vec32.y, vec32.z);
-				if (fireAspectLevel > 0) entity.igniteForSeconds(fireAspectLevel + 3);
 				skeweredCount++;
 			} else {
 				break;
 			}
 
 			// Vainglory healing
-			if (enchantmentLevels.vaingloryLevel > 0) {
-				player.heal(1.0F * enchantmentLevels.vaingloryLevel);
+			if (enchantmentLevels.getEnchantmentLevel(VGEnchantments.VAINGLORY) > 0) {
+				player.heal(1.0F * enchantmentLevels.getEnchantmentLevel(VGEnchantments.VAINGLORY));
 			}
 
 			// Orthogonal knockback
-			if (enchantmentLevels.galeForceLevel > 0) {
-				Vec3 orthogonalKnockback = dashVec.cross(new Vec3(0, 1, 0)).normalize().scale(baseSpeed * 0.5 * enchantmentLevels.galeForceLevel);
+			if (enchantmentLevels.getEnchantmentLevel(VGEnchantments.GALE_FORCE) > 0) {
+				Vec3 orthogonalKnockback = dashVec.cross(new Vec3(0, 1, 0)).normalize().scale(baseSpeed * 0.5 * enchantmentLevels.getEnchantmentLevel(VGEnchantments.GALE_FORCE));
 				entity.setDeltaMovement(orthogonalKnockback.x, orthogonalKnockback.y, orthogonalKnockback.z);
 			}
 
-			if (enchantmentLevels.cavalierLevel > 0 && (entity.hasExactlyOnePlayerPassenger() || player.isPassenger())) {
+			if (enchantmentLevels.getEnchantmentLevel(VGEnchantments.CAVALIER) > 0 && (entity.hasExactlyOnePlayerPassenger() || player.isPassenger())) {
 				baseSpeed *= 1.5;
 			}
 		}
 	}
 
 	private int getFireAspectLevel(Player player, Level world) {
-		if (Utils.hasEnchantment(Enchantments.FIRE_ASPECT, player.getUseItem())) {
+		EnchantmentLevels levels = getEnchantmentLevels(player.getUseItem(), world);
+		/*if (Utils.hasEnchantment(Enchantments.FIRE_ASPECT, player.getUseItem())) {
 			return EnchantmentHelper.getItemEnchantmentLevel(
 					world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FIRE_ASPECT),
 					player.getUseItem()
 			);
-		}
-		return 0;
+		}*/
+		return levels.getEnchantmentLevel(Enchantments.FIRE_ASPECT);
 	}
 
-	private EnchantmentLevels getEnchantmentLevels(ItemStack lance, Level world) {
+	private EnchantmentLevels getEnchantmentLevels(ItemStack stack, Level world) {
 		HolderLookup.RegistryLookup<Enchantment> enchantmentRegistryLookup = world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+		Map<ResourceKey<Enchantment>, Integer> enchantments = new HashMap<>();
 
-		int skeweringLevel = getEnchantmentLevel(VGEnchantments.SKEWERING, lance, enchantmentRegistryLookup);
-		int cavalierLevel = getEnchantmentLevel(VGEnchantments.CAVALIER, lance, enchantmentRegistryLookup);
-		int intrepidLevel = getEnchantmentLevel(VGEnchantments.INTREPID, lance, enchantmentRegistryLookup);
-		int sharpnessLevel = getEnchantmentLevel(Enchantments.SHARPNESS, lance, enchantmentRegistryLookup);
-		int windRiderLevel = getEnchantmentLevel(VGEnchantments.WIND_RIDER, lance, enchantmentRegistryLookup);
-		int excavatorLevel = getEnchantmentLevel(VGEnchantments.EXCAVATOR, lance, enchantmentRegistryLookup);
-		int vaingloryLevel = getEnchantmentLevel(VGEnchantments.VAINGLORY, lance, enchantmentRegistryLookup);
-		int galeForceLevel = getEnchantmentLevel(VGEnchantments.GALE_FORCE, lance, enchantmentRegistryLookup);
-		int broadsideLevel = getEnchantmentLevel(VGEnchantments.BROADSIDE, lance, enchantmentRegistryLookup);
-		int quickChargeLevel = getEnchantmentLevel(VGEnchantments.QUICK_CHARGE, lance, enchantmentRegistryLookup);
-		int breachLevel = getEnchantmentLevel(VGEnchantments.BREACH, lance, enchantmentRegistryLookup);
+		addEnchantmentToMap(VGEnchantments.SKEWERING, stack, enchantmentRegistryLookup, enchantments);
+		addEnchantmentToMap(VGEnchantments.CAVALIER, stack, enchantmentRegistryLookup, enchantments);
+		addEnchantmentToMap(VGEnchantments.INTREPID, stack, enchantmentRegistryLookup, enchantments);
+		addEnchantmentToMap(Enchantments.SHARPNESS, stack, enchantmentRegistryLookup, enchantments);
+		addEnchantmentToMap(VGEnchantments.WIND_RIDER, stack, enchantmentRegistryLookup, enchantments);
+		addEnchantmentToMap(VGEnchantments.EXCAVATOR, stack, enchantmentRegistryLookup, enchantments);
+		addEnchantmentToMap(VGEnchantments.VAINGLORY, stack, enchantmentRegistryLookup, enchantments);
+		addEnchantmentToMap(VGEnchantments.GALE_FORCE, stack, enchantmentRegistryLookup, enchantments);
+		addEnchantmentToMap(VGEnchantments.BROADSIDE, stack, enchantmentRegistryLookup, enchantments);
+		addEnchantmentToMap(VGEnchantments.QUICK_CHARGE, stack, enchantmentRegistryLookup, enchantments);
+		addEnchantmentToMap(VGEnchantments.BREACH, stack, enchantmentRegistryLookup, enchantments);
 
-		return new EnchantmentLevels(skeweringLevel, cavalierLevel, intrepidLevel, sharpnessLevel, windRiderLevel, excavatorLevel, vaingloryLevel, galeForceLevel, broadsideLevel, quickChargeLevel, breachLevel);
+		return new EnchantmentLevels(enchantments);
 	}
 
 
-	private int getEnchantmentLevel(ResourceKey<Enchantment> enchantment, ItemStack itemStack, HolderLookup.RegistryLookup<Enchantment> enchantmentRegistryLookup) {
-		return Utils.hasEnchantment(enchantment, itemStack) ? EnchantmentHelper.getItemEnchantmentLevel(enchantmentRegistryLookup.getOrThrow(enchantment), itemStack) : 0;
+	private void addEnchantmentToMap(ResourceKey<Enchantment> enchantment, ItemStack itemStack,
+									HolderLookup.RegistryLookup<Enchantment> enchantmentRegistryLookup,
+									Map<ResourceKey<Enchantment>, Integer> enchantments) {
+
+		if (itemStack.has(DataComponents.STORED_ENCHANTMENTS)) {
+			ItemEnchantments itemEnchantments = itemStack.get(DataComponents.STORED_ENCHANTMENTS);
+			for (Holder<Enchantment> enchantmentHolder : itemEnchantments.keySet()) {
+				enchantmentHolder.unwrapKey().orElseThrow();
+				enchantments.put(enchantmentHolder.unwrapKey().orElseThrow(), itemEnchantments.getLevel(enchantmentRegistryLookup.getOrThrow(enchantment)));
+			}
+		} else {
+			int enchantmentLevel = Utils.hasEnchantment(enchantment, itemStack) ? EnchantmentHelper.getItemEnchantmentLevel(enchantmentRegistryLookup.getOrThrow(enchantment), itemStack) : 0;
+			enchantments.put(enchantment, enchantmentLevel);
+		}
 	}
 
 	public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
@@ -304,9 +319,13 @@ public class LanceItem extends Item {
 		itemStack.hurtAndBreak(1, livingEntity2, EquipmentSlot.MAINHAND);
 	}
 
-	private static record EnchantmentLevels(int skeweringLevel, int cavalierLevel, int intrepidLevel, int sharpnessLevel, int windRiderLevel,
-											int excavatorLevel, int vaingloryLevel, int galeForceLevel, int broadsideLevel, int quickChargeLevel,
-											int breachLevel) { }
-
+	private static record EnchantmentLevels(Map<ResourceKey<Enchantment>, Integer> enchantments) {
+		public int getEnchantmentLevel(ResourceKey<Enchantment> enchantment) {
+			if (enchantments.get(enchantment) != null) {
+				return enchantments.get(enchantment);
+			}
+			return 0;
+		}
+	}
 
 }

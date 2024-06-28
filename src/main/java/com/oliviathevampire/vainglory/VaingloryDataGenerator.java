@@ -30,6 +30,8 @@ public class VaingloryDataGenerator implements DataGeneratorEntrypoint {
 		@Override
 		public void generateTranslations(HolderLookup.Provider registryLookup, TranslationBuilder translationBuilder) {
 			translationBuilder.add(VGItems.LANCE, "Lance");
+			translationBuilder.add(VGItems.AXE_OF_CLEAVING, "Axe of Cleaving");
+			translationBuilder.add(VGItems.STAFF, "Staff");
 			translationBuilder.addEnchantment(VGEnchantments.SKEWERING, "Skewering");
 			translationBuilder.addEnchantment(VGEnchantments.CAVALIER, "Cavalier");
 			translationBuilder.addEnchantment(VGEnchantments.INTREPID, "Intrepid");
@@ -48,12 +50,12 @@ public class VaingloryDataGenerator implements DataGeneratorEntrypoint {
 
 		@Override
 		protected void addTags(HolderLookup.Provider wrapperLookup) {
-			this.tag(ItemTags.SWORD_ENCHANTABLE).add(reverseLookup(VGItems.LANCE));
-			this.tag(ItemTags.MACE_ENCHANTABLE).add(reverseLookup(VGItems.LANCE));
-			this.tag(ItemTags.DURABILITY_ENCHANTABLE).add(reverseLookup(VGItems.LANCE));
-			this.tag(ItemTags.FIRE_ASPECT_ENCHANTABLE).add(reverseLookup(VGItems.LANCE));
-			this.tag(ItemTags.SHARP_WEAPON_ENCHANTABLE).add(reverseLookup(VGItems.LANCE));
+			this.tag(ItemTags.SWORD_ENCHANTABLE).add(reverseLookup(VGItems.LANCE), reverseLookup(VGItems.AXE_OF_CLEAVING));
+			this.tag(ItemTags.DURABILITY_ENCHANTABLE).add(reverseLookup(VGItems.LANCE), reverseLookup(VGItems.AXE_OF_CLEAVING), reverseLookup(VGItems.STAFF));
+			this.tag(ItemTags.FIRE_ASPECT_ENCHANTABLE).add(reverseLookup(VGItems.LANCE), reverseLookup(VGItems.AXE_OF_CLEAVING), reverseLookup(VGItems.STAFF));
+			this.tag(ItemTags.SHARP_WEAPON_ENCHANTABLE).add(reverseLookup(VGItems.LANCE), reverseLookup(VGItems.AXE_OF_CLEAVING));
 			this.tag(VGItemTags.LANCE_ENCHANTABLE).add(reverseLookup(VGItems.LANCE));
+			this.tag(VGItemTags.AXE_OF_CLEAVING_ENCHANTABLE).add(reverseLookup(VGItems.AXE_OF_CLEAVING));
 		}
 	}
 }

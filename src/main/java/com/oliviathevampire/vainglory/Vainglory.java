@@ -4,11 +4,16 @@ import com.oliviathevampire.vainglory.init.VGItemTags;
 import com.oliviathevampire.vainglory.init.VGItems;
 import com.oliviathevampire.vainglory.init.VGLoot;
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 public class Vainglory implements ModInitializer {
+
 	public static final String MOD_ID = "vainglory";
 
     public static final Logger LOGGER = LoggerFactory.getLogger("Vainglory");
