@@ -127,8 +127,7 @@ public class LanceItem extends Item {
 	}
 
 	private static float getPowerForTime(int i, ItemStack itemStack, LivingEntity livingEntity) {
-		float f = (float)i / (float)getChargeDuration(itemStack, livingEntity);
-		return f;
+		return (float)i / (float)getChargeDuration(itemStack, livingEntity);
 	}
 
 	@Override

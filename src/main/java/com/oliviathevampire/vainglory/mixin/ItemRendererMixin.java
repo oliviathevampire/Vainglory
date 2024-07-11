@@ -24,7 +24,10 @@ public abstract class ItemRendererMixin {
         ItemDisplayContext context = localContext.get();
         BakedModel originalModel = original.call(instance, stack, level, entity, seed);
 
-        if (context != ItemDisplayContext.GUI && context != ItemDisplayContext.GROUND && context != ItemDisplayContext.FIXED) {
+        if (context.equals(ItemDisplayContext.FIRST_PERSON_LEFT_HAND)
+                || context.equals(ItemDisplayContext.FIRST_PERSON_RIGHT_HAND)
+                || context.equals(ItemDisplayContext.THIRD_PERSON_LEFT_HAND)
+                || context.equals(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)) {
             if (!VaingloryClient.BIG_MODELS.containsKey(stack.getItem())) return originalModel;
 
             AtomicReference<ModelResourceLocation> modelResourceLocation = new AtomicReference<>();
